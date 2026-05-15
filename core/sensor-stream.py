@@ -20,8 +20,6 @@ REG_GYRO_DATA_X_LSB = 0x14
 # BNO055 Operating Modes
 MODE_CONFIG = 0x00
 MODE_NDOF = 0x0C  # Nine Degrees of Freedom (Sensor Fusion Mode)
-
-
 # endregion
 
 class TCA9548A_Multiplexer:
@@ -50,15 +48,22 @@ class TCA9548A_Multiplexer:
         """
         <summary>
         Switches the multiplexer to the specified channel (0-7).
+        Safely catches hardware disconnection errors.
         </summary>
         <param name="channel">The channel number to activate.</param>
+        <returns>True if successful, False if the multiplexer is unreachable.</returns>
         """
         if channel < 0 or channel > 7:
             raise ValueError("Channel must be between 0 and 7.")
 
-        # Write a single byte with the bit set for the desired channel
-        self.bus.write_byte(self.address, 1 << channel)
-        time.sleep(0.001)  # Brief pause to allow hardware routing to switch
+        try:
+            # Write a single byte with the bit set for the desired channel
+            self.bus.write_byte(self.address, 1 << channel)
+            time.sleep(0.001)  # Brief pause to allow hardware routing to switch
+            return True
+        except OSError:
+            print(f"Warning: Multiplexer unresponsive on channel {channel}. Check wiring.")
+            return False
     # endregion
 
 
@@ -108,7 +113,7 @@ class SEN0253_IMU:
         except PermissionError:
             print("Permission denied: Ensure your user is in the 'i2c' group or run via sudo.")
         except Exception as e:
-            print(f"Error initializing sensor: {e}")
+            print(f"Warning: Initialization failed. Sensor may be disconnected. ({e})")
 
     # endregion
 
@@ -135,8 +140,8 @@ class SEN0253_IMU:
             z = self._twos_comp((data[5] << 8) | data[4], 16)
 
             return {'x': x, 'y': y, 'z': z}
-        except Exception as e:
-            print(f"I2C Read Error: {e}")
+        except Exception:
+            # Silently return zeros so the stream doesn't crash on mid-stream disconnects
             return {'x': 0, 'y': 0, 'z': 0}
 
     def _twos_comp(self, val, bits):
@@ -180,7 +185,8 @@ if __name__ == "__main__":
     """
     <summary>
     Main entry point. Reads BNO055 data from multiple sensors via multiplexer 
-    and streams it over the network via UDP.
+    and streams it over the network via UDP. Continues streaming zeros if 
+    sensors are disconnected.
     </summary>
     """
     # Network Configuration
@@ -212,14 +218,18 @@ if __name__ == "__main__":
 
         while True:
             # 1. Read Data from the Left Glove (Channel 0)
-            mux.select_channel(0)
-            accel_0 = sensor_0.get_accel_data()
-            gyro_0 = sensor_0.get_gyro_data()
+            if mux.select_channel(0):
+                accel_0 = sensor_0.get_accel_data()
+                gyro_0 = sensor_0.get_gyro_data()
+            else:
+                accel_0 = gyro_0 = {'x': 0, 'y': 0, 'z': 0}
 
             # 2. Read Data from the Right Glove (Channel 1)
-            mux.select_channel(1)
-            accel_1 = sensor_1.get_accel_data()
-            gyro_1 = sensor_1.get_gyro_data()
+            if mux.select_channel(1):
+                accel_1 = sensor_1.get_accel_data()
+                gyro_1 = sensor_1.get_gyro_data()
+            else:
+                accel_1 = gyro_1 = {'x': 0, 'y': 0, 'z': 0}
 
             # 3. Package both gloves into a single JSON dictionary
             payload = {
