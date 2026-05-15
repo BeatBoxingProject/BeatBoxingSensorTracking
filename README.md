@@ -1,4 +1,4 @@
-# 🥊 BeatBoxing Sensor Tracking
+# 📡 BeatBoxing Sensor Tracking
 
 The system utilizes a **Raspberry Pi Zero 2W** mounted on the player or equipment, which reads data from two **BNO055 IMU sensors** (one for each glove) via an I2C multiplexer. This telemetry is packaged into a JSON payload and streamed wirelessly via UDP to the host machine running Unity.
 
@@ -19,8 +19,6 @@ The system utilizes a **Raspberry Pi Zero 2W** mounted on the player or equipmen
     * Pi I2C (SDA/SCL) $\rightarrow$ Multiplexer Main I2C
     * Multiplexer Channel 0 $\rightarrow$ Left Glove IMU
     * Multiplexer Channel 1 $\rightarrow$ Right Glove IMU
-
-
 5. **Network:** Both the Pi and the Host PC must be on the same local network. The scripts are currently configured to target the IP `10.42.0.1`.
 
 ## 📂 Project Structure
