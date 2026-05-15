@@ -27,8 +27,8 @@ The system utilizes a **Raspberry Pi Zero 2W** mounted on the player or equipmen
 
 | Location | Description |
 | --- | --- |
-| `sensor-stream.py` (Pi Version) | **The Transmitter.** Runs on the Raspberry Pi Zero 2W. Handles I2C communication, multiplexer switching, and UDP broadcasting. |
-| `sensor-stream.py` (PC Version) | **The Visualizer.** Runs on the Host PC. Listens for the UDP packets and plots the live $X, Y, Z$ acceleration data for both gloves. |
+| `sensor-stream.py` (Pi) | **The Transmitter.** Runs on the Raspberry Pi Zero 2W. Handles I2C communication, multiplexer switching, and UDP broadcasting. |
+| `visualizer.py` (PC) | **The Visualizer.** Runs on the Host PC. Listens for the UDP packets and plots the live $X, Y, Z$ acceleration data for both gloves. |
 
 ## ⚙️ Installation & Requirements
 
