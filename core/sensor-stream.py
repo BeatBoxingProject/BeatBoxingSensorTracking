@@ -121,11 +121,12 @@ class SEN0253_IMU:
     def _read_raw_data(self, reg_address):
         """
         <summary>
-        Reads 6 bytes of sequential data from a specified starting register
-        and converts them into signed 16-bit integers for the X, Y, and Z axes.
+        Reads 6 bytes of sequential data from a specified starting register,
+        converts them into signed 16-bit integers, and remaps the axes to match
+        the correct physical orientation.
         </summary>
         <param name="reg_address">The starting register address.</param>
-        <returns>A dictionary containing the X, Y, and Z axis values.</returns>
+        <returns>A dictionary containing the remapped X, Y, and Z axis values.</returns>
         """
         if self.bus is None:
             return {'x': 0, 'y': 0, 'z': 0}
@@ -135,11 +136,16 @@ class SEN0253_IMU:
             data = self.bus.read_i2c_block_data(self.address, reg_address, 6)
 
             # Convert two's complement 16-bit values (Little Endian for BNO055)
-            x = self._twos_comp((data[1] << 8) | data[0], 16)
-            y = self._twos_comp((data[3] << 8) | data[2], 16)
-            z = self._twos_comp((data[5] << 8) | data[4], 16)
+            raw_x = self._twos_comp((data[1] << 8) | data[0], 16)
+            raw_y = self._twos_comp((data[3] << 8) | data[2], 16)
+            raw_z = self._twos_comp((data[5] << 8) | data[4], 16)
 
-            return {'x': x, 'y': y, 'z': z}
+            # Axis Remapping based on sensor mounting orientation
+            return {
+                'x': raw_y,  # The sensor's Y axis is actually the physical X axis
+                'y': raw_z,  # The sensor's Z axis is actually the physical Y axis
+                'z': -raw_x  # The sensor's X axis is inverted and mapped to physical Z
+            }
         except Exception:
             # Silently return zeros so the stream doesn't crash on mid-stream disconnects
             return {'x': 0, 'y': 0, 'z': 0}
