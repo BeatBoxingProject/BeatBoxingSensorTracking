@@ -34,7 +34,7 @@ The system utilizes a **Raspberry Pi Zero 2W** mounted on the player or equipmen
 | --- | --- |
 | `core/sensor-stream.py` (Pi) | **The Transmitter.** Runs on the Raspberry Pi Zero 2W. Handles I2C communication, multiplexer switching, and UDP broadcasting. |
 | `core/visualizer.py` (PC) | **The Visualizer.** Runs on the Host PC. Listens for the UDP packets and plots the live $X, Y, Z$ acceleration data for both gloves. |
-| `core/piezo/main.py` (Pi) | **Piezo ADC Tester.** Tests and reads analog values from the piezo sensors via the ADS1263 module over SPI. |
+| `core/ad_hat/main.py` (Pi) | **AD HAT Diagnostic & Sensor Suite.** Tests SPI communication, channel scans, differential pairs, and sensor approaches (Piezo and Load Cell) on the Waveshare ADS1263 AD HAT. |
 
 ## ⚙️ Installation & Requirements
 
@@ -92,15 +92,25 @@ python core/sensor-stream.py
 
 * **Expected Output:** The console will confirm connection to the BNO055 chips (reading Chip ID `0xA0`) and confirm initialization in NDOF mode.
 
-### 2. Test the Piezo Sensors (Raspberry Pi)
+### 2. Test the AD HAT & Sensors (Raspberry Pi)
 
-You can run the standalone ADC test script to verify piezo sensor readings:
+You can run the AD HAT diagnostic and test suite to verify communication, channel voltages, and sensor modes:
 
 ```bash
-python core/piezo/main.py
+# General channel scan (single-ended AIN0-AIN4)
+python core/ad_hat/main.py --mode scan
+
+# Differential pair scan (AIN0-AIN1, AIN2-AIN3)
+python core/ad_hat/main.py --mode diff
+
+# Test Piezo sensor impact reading on channel 0
+python core/ad_hat/main.py --mode piezo --channel 0
+
+# Test Load Cell differential bridge reading
+python core/ad_hat/main.py --mode loadcell --diff-channel 0
 ```
 
-* **Expected Output:** The console will print the voltages read from the ADS1263 analog inputs. Squeezing or striking the piezo should cause a spike in the voltage reading.
+* **Expected Output:** The console will verify communication with the ADS1263 chip and stream live voltage readouts. Tapping the piezo or applying pressure to the load cell will produce immediate voltage responses.
 
 ### 3. Verify Data with the Visualizer (Host PC)
 

@@ -1,2 +1,5 @@
 smbus2
 matplotlib
+# Raspberry Pi hardware libraries (install on Raspberry Pi):
+# spidev
+# rpi-lgpio

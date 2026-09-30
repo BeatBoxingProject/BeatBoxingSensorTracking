@@ -27,8 +27,18 @@
 # THE SOFTWARE.
 #
 
-import config
-import RPi.GPIO as GPIO
+try:
+    from . import config
+except (ImportError, ValueError):
+    import config
+
+try:
+    import RPi.GPIO as GPIO
+except (ImportError, Exception):
+    class DummyGPIO:
+        HIGH = 1
+        LOW = 0
+    GPIO = DummyGPIO()
 
 # gain
 ADS1263_GAIN = {
@@ -448,7 +458,7 @@ class ADS1263:
             # config.delay_ms(2)
             self.ADS1263_WriteCmd(ADS1263_CMD['CMD_START2'])
             # config.delay_ms(2)
-            Value = self.ADS1263_Read_AD2C_Data()
+            Value = self.ADS1263_Read_ADC2_Data()
         return Value
 
     def ADS1263_GetAll(self, List):
