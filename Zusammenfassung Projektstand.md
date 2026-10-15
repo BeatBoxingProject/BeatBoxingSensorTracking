@@ -69,9 +69,8 @@ Die Wägezelle misst nur die Kraft an der Stelle, an der sie sitzt. Wie viel von
 ## 6. Wie könnte es weitergehen?
 
 1. **Variante B voll gespannt testen:** prüfen, ob das Nachschwingen bei voller Spannung ganz verschwindet. Dabei schrittweise Spannung erhöhen und festhalten, ab wann sich der Sack zu hart anfühlt.
-2. **Nachgiebigkeit gezielt einbauen:** z. B. Gummipuffer oder elastische Gurte unten, damit der Sack gespannt ist, aber nicht hart wie Beton. Alternativ das Nachschwingen in der Software herausfiltern (Schläge sind kurze, steile Spitzen, die Schwingung ist langsam).
-3. **Variante C aufbauen:** zweite Wägezelle unten einbauen, beide Kanäle gleichzeitig auslesen und mit Schlägen auf verschiedenen Höhen prüfen, ob die Summe wirklich unabhängig von der Trefferhöhe ist.
-4. **Kalibrieren und aufzeichnen:** Wägezellen mit bekannten Gewichten kalibrieren, die Daten mit Zeitstempel speichern und pro Schlag Spitzenkraft, Impuls und Kontaktdauer auswerten.
+2. **Variante C aufbauen:** zweite Wägezelle unten einbauen, beide Kanäle gleichzeitig auslesen und mit Schlägen auf verschiedenen Höhen prüfen, ob die Summe wirklich unabhängig von der Trefferhöhe ist.
+3. **Kalibrieren und aufzeichnen:** Wägezellen mit bekannten Gewichten kalibrieren, die Daten mit Zeitstempel speichern und pro Schlag Spitzenkraft, Impuls und Kontaktdauer auswerten.
 
 ---
 
