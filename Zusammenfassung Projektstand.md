@@ -8,12 +8,12 @@
 
 Wir haben vier Messprinzipien recherchiert und verglichen:
 
-| Ansatz | Was wird gemessen? | Vorteil | Nachteil |
-| :--- | :--- | :--- | :--- |
-| **IMU im Handschuh** | Beschleunigung und Drehrate der Faust | günstig, mobil, erkennt auch die Schlagart (Jab, Hook …) | Kraft nur **indirekt** über F = m·a. Die „effektive Masse“ des Arms ist unbekannt, außerdem Drift und Verrutschen im Handschuh |
-| **Piezo / FSR am Sack** | Druck an der Kontaktfläche | sehr schnell, genauer Zeitpunkt des Treffers | misst nur dort, wo der Sensor sitzt. FSR nichtlinear und mechanisch empfindlich |
-| **Kamera-Tracking** | 3D-Bewegung der Faust | berührungslos | braucht ≥ 1000 fps, Faust wird oft verdeckt, hoher Aufwand |
-| **Wägezelle (Load Cell)** | Kraft an der Aufhängung des Sacks | misst Kraft **direkt** in Newton, linear, robust, einfach mit Gewichten kalibrierbar | mechanischer Umbau der Aufhängung nötig, schneller ADC nötig |
+| Ansatz                    | Was wird gemessen? | Vorteil | Nachteil                                                                                                                             |
+|:--------------------------| :--- | :--- |:-------------------------------------------------------------------------------------------------------------------------------------|
+| **IMU auf dem Handschuh** | Beschleunigung und Drehrate der Faust | günstig, mobil, erkennt auch die Schlagart (Jab, Hook …) | Kraft nur **indirekt** über F = m·a. Die „effektive Masse“ des Arms ist unbekannt, außerdem Drift und Verrutschen auf deme Handschuh |
+| **Piezo / FSR am Sack**   | Druck an der Kontaktfläche | sehr schnell, genauer Zeitpunkt des Treffers | misst nur dort, wo der Sensor sitzt. FSR nichtlinear und mechanisch empfindlich                                                      |
+| **Kamera-Tracking**       | 3D-Bewegung der Faust | berührungslos | braucht ≥ 1000 fps, Faust wird oft verdeckt, hoher Aufwand                                                                           |
+| **Wägezelle (Load Cell)** | Kraft an der Aufhängung des Sacks | misst Kraft **direkt** in Newton, linear, robust, einfach mit Gewichten kalibrierbar | mechanischer Umbau der Aufhängung nötig, schneller ADC nötig                                                                         |
 
 **Entscheidung:** Wir verfolgen **IMU** (für Bewegung und Schlagerkennung) und **Wägezelle** (für die eigentliche Kraft in Newton).
 
@@ -58,9 +58,11 @@ Die Wägezelle misst nur die Kraft an der Stelle, an der sie sitzt. Wie viel von
 1. **Spannung gegen Schlaggefühl:** Je stärker der Sack gespannt ist, desto weniger schwingt er. Ein voll gespannter Sack gibt aber kaum nach und fühlt sich an, als würde man auf Beton schlagen. Das ist unangenehm und belastet die Handgelenke. Gesucht ist eine Spannung, die genug Schwingung unterdrückt und trotzdem noch nachgibt.
 2. **Mit einem Sensor ist die Trefferhöhe unbekannt:** Auch bei voll gespanntem Sack bleibt eine physikalische Grenze. Die Schlagkraft verteilt sich auf die obere und die untere Befestigung, und zwar je nachdem, auf welcher Höhe getroffen wird. Ein Sensor oben misst nur seinen Anteil. Ohne die Trefferhöhe lässt sich daraus die echte Kraft nicht berechnen. Ein Körpertreffer weiter unten wird z. B. deutlich schwächer gemessen als ein gleich starker Kopftreffer. Mit nur einem Sensor geht es also nur, wenn man die Schlaghöhe vorgibt.
 3. **Variante C ungetestet:** Mit je einer Wägezelle oben und unten wäre die Trefferhöhe kein Problem mehr, weil sich die Kraft als Summe beider Messwerte ergibt und die Höhe aus ihrem Verhältnis folgt. Das ist bisher nur Theorie, dafür müsste man eine zweite Wägezelle und einen zweiten ADC-Kanal anschließen.
-4. **Abtastrate:** Ein Schlag dauert nur 15–30 ms, dafür braucht man mindestens 200–400 Hz pro Kanal. Bei zwei Wägezellen muss der ADS1263 zwischen den Kanälen umschalten, dadurch halbiert sich die Rate pro Kanal ungefähr. Das müssen wir für Variante C sicherstellen.
-5. **Noch keine Werte in Newton:** Die Wägezelle ist noch nicht mit bekannten Gewichten kalibriert, und die Umrechnung auf die Schlagkraft fehlt noch.
-6. **IMU-Messrate:** Aktuell senden wir nur mit 20 Hz. Für die Schlagerkennung reicht das, für eine Kraftabschätzung nicht.
+4. **Synchronisation bei zwei Wägezellen:** Bei Variante C werden die Messwerte oben und unten addiert. Das funktioniert nur, wenn beide Werte zum selben Zeitpunkt gehören. Da ein Schlag nur 15–30 ms dauert, braucht man eine Synchronisation im Millisekundenbereich. Eine WLAN-Übertragung ist für solche Echtzeitdaten unzuverlässig. Ohne Kabelverbindung kämen die Daten der beiden Sensoren wahrscheinlich nie genau gleichzeitig an, und selbst über LAN ist das vermutlich nicht perfekt.
+5. **Unbekannte Verluste und keine Referenz:** Ein Teil der Schlagenergie geht in die Verformung des Sacks, in Wärme und in Reibung. Wie groß dieser Anteil ist, können wir nicht genau bestimmen. Außerdem haben wir kein Referenzmessgerät, gegen das wir die Schlagkraft kalibrieren könnten. Die Wägezelle lässt sich zwar statisch mit Gewichten kalibrieren, aber das sagt nichts über einen dynamischen Schlag aus. Wir können deshalb nie garantieren, dass die gemessene Kraft der tatsächlichen Schlagkraft entspricht. Vergleiche zwischen Schlägen (stärker oder schwächer) sind möglich, absolute Werte in Newton bleiben unsicher.
+6. **Abtastrate:** Ein Schlag dauert nur 15–30 ms, dafür braucht man mindestens 200–400 Hz pro Kanal. Bei zwei Wägezellen muss der ADS1263 zwischen den Kanälen umschalten, dadurch halbiert sich die Rate pro Kanal ungefähr. Das müssen wir für Variante C sicherstellen.
+7. **Noch keine Werte in Newton:** Die Wägezelle ist noch nicht mit bekannten Gewichten kalibriert, und die Umrechnung auf die Schlagkraft fehlt noch.
+8. **IMU-Messrate:** Aktuell senden wir nur mit 20 Hz. Für die Schlagerkennung reicht das, für eine Kraftabschätzung nicht.
 
 ---
 
